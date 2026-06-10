@@ -22,21 +22,21 @@ class CLIPWrapper(nn.Module):
 
         self.model.eval()
 
-        # Store feature dim
-        self.vision_dim = self.model.config.vision_config.hidden_size
-        self.text_dim = self.model.config.text_config.hidden_size
+        # Store feature dim (projection dim = 512 for ViT-B/32)
+        self.vision_dim = self.model.config.projection_dim
+        self.text_dim = self.model.config.projection_dim
+        # Also store raw vision model dim (768 for ViT-B/32)
+        self.vision_hidden_dim = self.model.config.vision_config.hidden_size
 
     @torch.no_grad()
     def encode_rgb(self, pixel_values: torch.Tensor) -> torch.Tensor:
-        """Encode RGB images into CLIP vision embeddings.
-
-        Args:
-            pixel_values: (B, 3, H, W) normalized RGB tensor
-
-        Returns:
-            (B, D) normalized vision features
-        """
-        features = self.model.get_image_features(pixel_values)
+        """Encode RGB images into CLIP vision embeddings."""
+        output = self.model.get_image_features(pixel_values)
+        # Handle transformers 5.x returning output objects
+        if hasattr(output, "pooler_output"):
+            features = output.pooler_output
+        else:
+            features = output
         features = features / features.norm(dim=-1, keepdim=True)
         return features
 
@@ -49,19 +49,11 @@ class CLIPWrapper(nn.Module):
         """
         vision_model = self.model.vision_model
         outputs = vision_model(pixel_values, output_hidden_states=False)
-        # outputs.last_hidden_state: (B, N+1, D)
         return outputs.last_hidden_state
 
     @torch.no_grad()
     def encode_text(self, texts: Union[str, List[str]]) -> torch.Tensor:
-        """Encode text prompts into CLIP text embeddings.
-
-        Args:
-            texts: single string or list of strings
-
-        Returns:
-            (B, D) normalized text features
-        """
+        """Encode text prompts into CLIP text embeddings."""
         if isinstance(texts, str):
             texts = [texts]
 
@@ -73,20 +65,17 @@ class CLIPWrapper(nn.Module):
             max_length=77
         ).to(self.device)
 
-        features = self.model.get_text_features(**inputs)
+        output = self.model.get_text_features(**inputs)
+        if hasattr(output, "pooler_output"):
+            features = output.pooler_output
+        else:
+            features = output
         features = features / features.norm(dim=-1, keepdim=True)
         return features
 
-    def get_class_text_embeds(self, class_names: List[str], prefix: str = "a photo of a {}") -> torch.Tensor:
-        """Get text embeddings for zero-shot class names.
-
-        Args:
-            class_names: list of class names
-            prefix: prompt template with {} placeholder
-
-        Returns:
-            (C, D) normalized text features for each class
-        """
+    def get_class_text_embeds(self, class_names: List[str],
+                              prefix: str = "a photo of a {}") -> torch.Tensor:
+        """Get text embeddings for zero-shot class names."""
         prompts = [prefix.format(name) for name in class_names]
         return self.encode_text(prompts)
 
