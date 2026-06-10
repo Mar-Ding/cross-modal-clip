@@ -1,38 +1,34 @@
-"""Configuration for CLIP cross-modal sensor adaptation."""
+"""Configuration for depth scene classification with frozen backbone."""
 
 from dataclasses import dataclass, field
-from typing import Optional
 import torch
 
 
 @dataclass
 class Config:
-    # CLIP model
-    clip_model_name: str = "openai/clip-vit-base-patch32"
+    # Backbone model
+    backbone_model_name: str = "facebook/dinov2-base"
+    depth_weights_path: str = ""  # Path to Depth Anything .pth (empty = plain DINOv2)
 
-    # Adapter
-    adapter_type: str = "mlp"  # "mlp" or "cross_attn"
-    adapter_hidden_dim: int = 512
-    adapter_num_layers: int = 2
-    adapter_dropout: float = 0.1
-
-    # Cross-attention adapter specific
-    num_query_tokens: int = 16
-    num_cross_attn_heads: int = 8
+    # Linear classifier
+    classifier_hidden_dim: int = 0  # 0 = linear (no hidden layer), >0 = MLP
+    classifier_dropout: float = 0.0
 
     # Training
     batch_size: int = 16
     learning_rate: float = 1e-3
     weight_decay: float = 1e-4
     num_epochs: int = 30
-    temperature: float = 0.07
 
     # Data - small sample mode
-    num_train_samples: int = 200
-    num_val_samples: int = 50
-    num_test_samples: int = 50
-    image_size: int = 224
+    num_train_samples: int = 900
+    num_val_samples: int = 200
+    num_test_samples: int = 249
+    image_size: int = 518  # DINOv2 native size
     num_workers: int = 0  # 0 for Windows compatibility
+
+    # Input source
+    use_rgb_input: bool = False  # True = use RGB image, False = use depth map
 
     # Output
     output_dir: str = "./output"
@@ -48,8 +44,3 @@ class Config:
         "library", "bookstore", "laundry", "furniture store",
         "study"
     ])
-
-    def __post_init__(self):
-        """Validate config."""
-        assert self.adapter_type in ("mlp", "cross_attn"), \
-            f"Unknown adapter type: {self.adapter_type}"

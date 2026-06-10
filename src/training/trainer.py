@@ -1,36 +1,38 @@
-"""Training loop for sensor adaptation."""
+"""Training loop for linear classifier on frozen Depth Anything features."""
 
 import torch
 import torch.nn as nn
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from tqdm import tqdm
-import os
 import json
 from pathlib import Path
-from src.models.sensor_adapter import CrossAttentionAdapter
+import os
+
+# Disable tokenizer parallelism warning
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 
 
-class Trainer:
-    """Trainer for contrastive sensor adapter learning."""
+class ClassifierTrainer:
+    """Simple cross-entropy classifier trainer with frozen backbone.
+
+    Trains only the linear classifier head; backbone remains frozen.
+    """
 
     def __init__(
         self,
-        adapter: nn.Module,
-        clip_wrapper: nn.Module,
-        depth_processor: nn.Module,
+        classifier: nn.Module,
+        backbone: nn.Module,
         loss_fn: nn.Module,
         config,
     ):
-        self.adapter = adapter
-        self.clip = clip_wrapper
-        self.depth_processor = depth_processor
+        self.classifier = classifier
+        self.backbone = backbone  # frozen
         self.loss_fn = loss_fn
         self.config = config
-        self.is_cross_attn = isinstance(adapter, CrossAttentionAdapter)
 
         self.optimizer = AdamW(
-            adapter.parameters(),
+            classifier.parameters(),
             lr=config.learning_rate,
             weight_decay=config.weight_decay,
         )
@@ -39,70 +41,47 @@ class Trainer:
         )
 
         self.device = config.device
+        self.use_rgb = getattr(config, "use_rgb_input", False)
         self.output_dir = Path(config.output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         self.history = {"train_loss": [], "val_loss": [], "val_acc": []}
 
-    def _get_depth_features(self, pixel_values):
-        """Get depth features: patch tokens for cross_attn, pooled for mlp."""
-        with torch.no_grad():
-            if self.is_cross_attn:
-                return self.clip.encode_rgb_patch_tokens(pixel_values)  # (B, N, D)
-            else:
-                return self.clip.encode_rgb(pixel_values)  # (B, D)
-
-    def _apply_adapter(self, features):
-        """Apply adapter, handling different return types."""
-        if self.is_cross_attn:
-            global_emb, local_tokens, attn_weights = self.adapter(features)
-            return global_emb
+    def _extract_features(self, batch):
+        """Extract features from depth (or RGB) images using frozen backbone."""
+        if self.use_rgb:
+            pil_images = batch["rgb_pil"]
         else:
-            return self.adapter(features)
+            pil_images = batch["depth_pil"]
+
+        # Convert single-channel PIL to 3-channel
+        rgb_tensors = [d.convert("RGB") for d in pil_images]
+
+        # Process with backbone's processor
+        inputs = self.backbone.processor(
+            images=rgb_tensors,
+            return_tensors="pt",
+            padding=True,
+        ).to(self.device)
+
+        with torch.no_grad():
+            features = self.backbone.encode_depth(inputs["pixel_values"])
+        return features
 
     def train_epoch(self, train_loader) -> float:
         """Train for one epoch."""
-        self.adapter.train()
+        self.classifier.train()
         total_loss = 0.0
 
         for batch in tqdm(train_loader, desc="Training", leave=False):
-            rgb_pil = batch["rgb_pil"]
-            depth_pil = batch["depth_pil"]
-
-            # Process RGB through CLIP
-            rgb_inputs = self.clip.processor(
-                images=rgb_pil,
-                return_tensors="pt",
-                padding=True,
-            ).to(self.device)
-            with torch.no_grad():
-                rgb_features = self.clip.encode_rgb(rgb_inputs["pixel_values"])
-
-            # Process depth through CLIP → adapter
-            # First convert depth PIL to CLIP-compatible 3-channel
-            depth_tensors = []
-            for d in depth_pil:
-                d_rgb = d.convert("RGB")  # 1-channel → 3-channel
-                depth_tensors.append(d_rgb)
-
-            depth_inputs = self.clip.processor(
-                images=depth_tensors,
-                return_tensors="pt",
-                padding=True,
-            ).to(self.device)
-
-            with torch.no_grad():
-                depth_clip_features = self._get_depth_features(depth_inputs["pixel_values"])
-
-            # Apply adapter
-            adapted = self._apply_adapter(depth_clip_features)
-
-            # Compute loss
-            loss = self.loss_fn(adapted, rgb_features)
+            labels = batch["label"].to(self.device)
+            features = self._extract_features(batch)
+            logits = self.classifier(features)
+            loss = self.loss_fn(logits, labels)
 
             self.optimizer.zero_grad()
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(self.adapter.parameters(), max_norm=1.0)
+            torch.nn.utils.clip_grad_norm_(self.classifier.parameters(), max_norm=1.0)
             self.optimizer.step()
 
             total_loss += loss.item()
@@ -116,48 +95,20 @@ class Trainer:
         Returns:
             (avg_loss, accuracy)
         """
-        self.adapter.eval()
+        self.classifier.eval()
         total_loss = 0.0
         correct = 0
         total = 0
 
         for batch in tqdm(val_loader, desc="Validating", leave=False):
-            rgb_pil = batch["rgb_pil"]
-            depth_pil = batch["depth_pil"]
             labels = batch["label"].to(self.device)
+            features = self._extract_features(batch)
+            logits = self.classifier(features)
 
-            # RGB features (CLIP)
-            rgb_inputs = self.clip.processor(
-                images=rgb_pil,
-                return_tensors="pt",
-                padding=True,
-            ).to(self.device)
-            rgb_features = self.clip.encode_rgb(rgb_inputs["pixel_values"])
-
-            # Depth → adapter
-            depth_tensors = [d.convert("RGB") for d in depth_pil]
-            depth_inputs = self.clip.processor(
-                images=depth_tensors,
-                return_tensors="pt",
-                padding=True,
-            ).to(self.device)
-            depth_clip_features = self._get_depth_features(depth_inputs["pixel_values"])
-            adapted = self._apply_adapter(depth_clip_features)
-
-            # Loss
-            loss = self.loss_fn(adapted, rgb_features)
+            loss = self.loss_fn(logits, labels)
             total_loss += loss.item()
 
-            # Zero-shot classification via text
-            # Get text embeddings for all scene classes
-            text_embeds = self.clip.get_class_text_embeds(
-                self.config.nyu_classes,
-                prefix="a photo of a {}"
-            )
-
-            # Adapted depth → text similarity
-            sim = adapted @ text_embeds.T  # (B, C)
-            preds = sim.argmax(dim=1)
+            preds = logits.argmax(dim=1)
             correct += (preds == labels).sum().item()
             total += labels.size(0)
 
@@ -189,12 +140,12 @@ class Trainer:
             # Save best model
             if val_acc > best_val_acc:
                 best_val_acc = val_acc
-                torch.save(self.adapter.state_dict(),
-                           self.output_dir / "best_adapter.pt")
+                torch.save(self.classifier.state_dict(),
+                           self.output_dir / "best_classifier.pt")
 
         # Save final model and history
-        torch.save(self.adapter.state_dict(),
-                   self.output_dir / "final_adapter.pt")
+        torch.save(self.classifier.state_dict(),
+                   self.output_dir / "final_classifier.pt")
         with open(self.output_dir / "history.json", "w") as f:
             json.dump(self.history, f, indent=2)
 
