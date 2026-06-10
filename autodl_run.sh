@@ -104,20 +104,20 @@ run_exp "A_depth_da_aug" \
     --load-depth-weights "$DA_WEIGHTS" \
     --epochs 100 --lr 2e-3 --batch-size 16
 
-# ---- 实验 B: 无数据增强 ----
-run_exp "B_depth_da_noaug" \
-    --load-depth-weights "$DA_WEIGHTS" \
-    --no-augment \
-    --epochs 100 --lr 2e-3 --batch-size 16
+# ---- 实验 B: 无数据增强 ---- # 注释掉，缩减时间
+# run_exp "B_depth_da_noaug" \
+#     --load-depth-weights "$DA_WEIGHTS" \
+#     --no-augment \
+#     --epochs 100 --lr 2e-3 --batch-size 16
 
 # ---- 实验 C: 普通 DINOv2（无 Depth Anything 权重）+ 增强 ----
 run_exp "C_depth_dinov2_aug" \
     --epochs 100 --lr 2e-3 --batch-size 16
 
-# ---- 实验 D: 普通 DINOv2 + 无增强（基线）----
-run_exp "D_depth_dinov2_noaug" \
-    --no-augment \
-    --epochs 100 --lr 2e-3 --batch-size 16
+# ---- 实验 D: 普通 DINOv2 + 无增强（基线）---- # 注释掉
+# run_exp "D_depth_dinov2_noaug" \
+#     --no-augment \
+#     --epochs 100 --lr 2e-3 --batch-size 16
 
 # ---- 实验 E: RGB 基线（Depth 权重 + 增强）----
 run_exp "E_rgb_da_aug" \
@@ -131,11 +131,11 @@ run_exp "F_depth_small_da_aug" \
     --load-depth-weights "$DA_WEIGHTS" \
     --epochs 100 --lr 2e-3 --batch-size 32
 
-# ---- 实验 G: 不同学习率 1e-3 ----
-run_exp "G_depth_da_aug_lr1e3" \
-    --load-depth-weights "$DA_WEIGHTS" \
-    --lr 1e-3 \
-    --epochs 100 --batch-size 16
+# ---- 实验 G: 不同学习率 1e-3 ---- # 注释掉
+# run_exp "G_depth_da_aug_lr1e3" \
+#     --load-depth-weights "$DA_WEIGHTS" \
+#     --lr 1e-3 \
+#     --epochs 100 --batch-size 16
 
 # ── 6. 汇总结果 ──
 echo ""
