@@ -41,8 +41,8 @@ surpassing previous published depth-only results (33.2\%--42.6\%) by 12.9--22.3
 percentage points, while using only 10K trainable parameters---a 3,000--6,000$\times$
 reduction compared to full-network fine-tuning approaches.
 Data augmentation contributes a 20.5 percentage point improvement over the unaugmented baseline.
-Our results establish DINOv2 linear probing as the new state-of-the-art for depth-only
-scene classification and highlight the cross-modal transferability of self-supervised
+Our results provide a reference point for depth-only scene
+classification and highlight the cross-modal transferability of self-supervised
 RGB features.
 \end{abstract}
 
@@ -295,9 +295,9 @@ structural information that transfers naturally.
 % ════════════════════════════════════════════
 \section{Discussion}
 
-\subsection{State-of-the-Art for Depth-Only Scene Classification}
+\subsection{Comparison with Published Depth-Only Results}
 
-To our knowledge, this work establishes the first strong baseline for depth-only scene
+To our knowledge, this is one of the few dedicated evaluations of depth-only scene
 classification on the NYU Depth V2 dataset. Prior published results include
 33.2\% (Wang~\textit{et al.}~\cite{wang3d}, 3DV 2016) and 42.6\%
 (Hoffman~\textit{et al.}~\cite{hoffman2016}, ICRA 2016), both requiring full
@@ -330,7 +330,7 @@ yield higher accuracy.
 % ════════════════════════════════════════════
 \section{Conclusion}
 
-We establish DINOv2 linear probing as the new state-of-the-art for depth-only scene
+This work provides a reference evaluation for depth-only scene
 classification on NYU Depth V2. With a frozen DINOv2-Base backbone and a 10K-parameter
 linear classifier, we achieve 55.5\% Top-1 accuracy---surpassing previous published
 depth-only results (33.2\%--42.6\%) by 12.9--22.3 percentage points while using
