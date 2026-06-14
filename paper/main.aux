@@ -1,0 +1,90 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand*\HyPL@Entry[1]{}
+\citation{robotics_depth}
+\citation{dinov2}
+\citation{depthanything}
+\citation{places365}
+\citation{places365}
+\citation{sun397}
+\citation{nyu_depth}
+\citation{wang2016depth,gupta2014indoor}
+\citation{dinov2}
+\HyPL@Entry{0<</S/D>>}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {II}Related Work}{1}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Scene Classification}{1}{subsection.2.1}\protected@file@percent }
+\citation{depthanything}
+\citation{dpt}
+\citation{yosinski2014transferable}
+\citation{he2019rethinking}
+\citation{alain2016understanding}
+\citation{nyu_depth}
+\citation{wang2016depth}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Self-Supervised Visual Representation Learning}{2}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Depth-Specialized Pre-Training}{2}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-D}}Transfer Learning and Objective Alignment}{2}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}Method}{2}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Overview}{2}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Backbone Architecture: DINOv2-Base}{2}{subsection.3.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Experimental framework. A frozen DINOv2-Base backbone extracts [CLS] features from depth inputs, which are classified by a Linear(768, 13) head. Two weight initializations are compared.\relax }}{2}{figure.caption.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:overview}{{1}{2}{Experimental framework. A frozen DINOv2-Base backbone extracts [CLS] features from depth inputs, which are classified by a Linear(768, 13) head. Two weight initializations are compared.\relax }{figure.caption.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Linear Classifier}{2}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Loss Function}{2}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-E}}Training Details}{2}{subsection.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-F}}Dataset: NYU Depth V2}{2}{subsection.3.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Training configuration.\relax }}{3}{table.caption.2}\protected@file@percent }
+\newlabel{tab:training_config}{{I}{3}{Training configuration.\relax }{table.caption.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Experiments}{3}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Experimental Design}{3}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Main Results}{3}{subsection.4.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Main experimental results on NYU13 validation set.\relax }}{3}{table.caption.3}\protected@file@percent }
+\newlabel{tab:main_results}{{II}{3}{Main experimental results on NYU13 validation set.\relax }{table.caption.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}Training Dynamics}{3}{subsection.4.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Training dynamics. Left: validation accuracy curves. Right: loss curves. Blue = DINOv2, red = Depth Anything weights.\relax }}{3}{figure.caption.4}\protected@file@percent }
+\newlabel{fig:training_curves}{{2}{3}{Training dynamics. Left: validation accuracy curves. Right: loss curves. Blue = DINOv2, red = Depth Anything weights.\relax }{figure.caption.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-D}}Impact of Data Augmentation}{3}{subsection.4.4}\protected@file@percent }
+\citation{project_summary}
+\citation{project_summary}
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Component-wise contribution to accuracy improvement.\relax }}{4}{table.caption.5}\protected@file@percent }
+\newlabel{tab:aug_impact}{{III}{4}{Component-wise contribution to accuracy improvement.\relax }{table.caption.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-E}}Adapter Architecture Ablation (CLIP-based Approach)}{4}{subsection.4.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces CLIP-based MLP adapter ablation on NYU13 validation set (25 epochs).\relax }}{4}{table.caption.6}\protected@file@percent }
+\newlabel{tab:adapter_ablation}{{IV}{4}{CLIP-based MLP adapter ablation on NYU13 validation set (25 epochs).\relax }{table.caption.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Discussion}{4}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-A}}Why Depth-Pretrained Features Underperform}{4}{subsection.5.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Comparison of pre-training objectives and their effects on feature learning.\relax }}{4}{table.caption.7}\protected@file@percent }
+\newlabel{tab:objective_contrast}{{V}{4}{Comparison of pre-training objectives and their effects on feature learning.\relax }{table.caption.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Implications for Transfer Learning Practice}{4}{subsection.5.2}\protected@file@percent }
+\bibcite{dinov2}{1}
+\bibcite{depthanything}{2}
+\bibcite{nyu_depth}{3}
+\bibcite{places365}{4}
+\bibcite{sun397}{5}
+\bibcite{robotics_depth}{6}
+\bibcite{wang2016depth}{7}
+\bibcite{gupta2014indoor}{8}
+\bibcite{dpt}{9}
+\bibcite{yosinski2014transferable}{10}
+\bibcite{he2019rethinking}{11}
+\bibcite{project_summary}{12}
+\bibcite{alain2016understanding}{13}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-C}}Limitations}{5}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Conclusion}{5}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{5}{section*.8}\protected@file@percent }
+\gdef \@abspage@last{5}

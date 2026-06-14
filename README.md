@@ -76,7 +76,7 @@ python main.py --backbone facebook/dinov2-large
 ## 项目结构
 
 ```
-cross-modal-clip/
+depth-scene-classification/
 ├── main.py                    # 主入口（训练+评估+可视化）
 ├── src/
 │   ├── config.py              # 配置管理
